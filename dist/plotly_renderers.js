@@ -188,6 +188,7 @@
         return result;
       };
     };
+    $.pivotUtilities.makePlotlyChart = makePlotlyChart;
     return $.pivotUtilities.plotly_renderers = {
       "Horizontal Bar Chart": makePlotlyChart({
         type: 'bar',
