@@ -129,6 +129,7 @@ callWithJQuery ($, Plotly) ->
         renderArea.remove()
         return result
     $.pivotUtilities.makePlotlyChart = makePlotlyChart
+    $.pivotUtilities.makePlotlyScatterChart = makePlotlyScatterChart
     $.pivotUtilities.plotly_renderers =
         "Horizontal Bar Chart": makePlotlyChart({type: 'bar', orientation: 'h'},
             {barmode: 'group'}, true)
