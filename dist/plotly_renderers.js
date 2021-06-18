@@ -68,6 +68,13 @@
             trace.x = transpose ? values : labels;
             trace.y = transpose ? labels : values;
           }
+        if (traceOptions.extendFunctions) {
+            for (var property in traceOptions.extendFunctions) {
+                if (traceOptions.extendFunctions.hasOwnProperty(property)) {
+                    trace[property] = traceOptions.extendFunctions[property](trace);
+                }
+            }
+        }
           return $.extend(trace, traceOptions);
         });
         if (transpose) {
