@@ -47,6 +47,10 @@ callWithJQuery ($, Plotly) ->
                 else
                     trace.x = if transpose then values else labels
                     trace.y = if transpose then labels else values
+                if traceOptions.extendFunctions?
+                for property in traceOptions.extendFunctions
+                    trace[property] = traceOptions.extendFunctions[property](trace);
+                    
                 return $.extend(trace, traceOptions)
 
             if transpose
@@ -85,7 +89,6 @@ callWithJQuery ($, Plotly) ->
                     title: if transpose then null else fullAggName
                     automargin: true
 
-
             result = $("<div>").appendTo $("body")
             Plotly.newPlot(result[0], data, $.extend(layout, layoutOptions, opts.plotly), opts.plotlyConfig)
             return result.detach()
@@ -99,7 +102,8 @@ callWithJQuery ($, Plotly) ->
         opts = $.extend(true, {}, defaults, opts)
 
         rowKeys = pivotData.getRowKeys()
-        rowKeys.push [] if rowKeys.length == 0
+        rowKeys.push [] 
+        rowKeys.length == 0
         colKeys = pivotData.getColKeys()
         colKeys.push [] if colKeys.length == 0
 
