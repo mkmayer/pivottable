@@ -90,7 +90,7 @@ callWithJQuery ($, Plotly) ->
                     automargin: true
 
             result = $("<div>").appendTo $("body")
-            Plotly.newPlot(result[0], data, $.extend(layout, layoutOptions, opts.plotly), opts.plotlyConfig)
+            Plotly.newPlot(result[0], data, $.extend(true, layout, layoutOptions, opts.plotly), opts.plotlyConfig)
             return result.detach()
 
     makePlotlyScatterChart = -> (pivotData, opts) ->
@@ -128,7 +128,7 @@ callWithJQuery ($, Plotly) ->
 
         renderArea = $("<div>", style: "display:none;").appendTo $("body")
         result = $("<div>").appendTo renderArea
-        Plotly.newPlot(result[0], [data], $.extend(layout, opts.plotly), opts.plotlyConfig)
+        Plotly.newPlot(result[0], [data], $.extend(true, layout, opts.plotly), opts.plotlyConfig)
         result.detach()
         renderArea.remove()
         return result
