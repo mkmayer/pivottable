@@ -42,6 +42,14 @@ callWithJQuery ($, Plotly) ->
 
                 trace = {name: traceKey.join('-') || fullAggName}
                 if traceOptions.type == "pie"
+                    var isAllZero = true
+                    for valI of values
+                        if valI != 0
+                            isAllZero = false
+                            break
+                    if isAllZero
+                        values = []
+                        labels = []
                     trace.values = values
                     trace.labels = if labels.length > 1 then labels else [fullAggName]
                 else
