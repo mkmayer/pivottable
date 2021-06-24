@@ -62,6 +62,10 @@
             name: traceKey.join('-') || fullAggName
           };
           if (traceOptions.type === "pie") {
+            if (!values.some(item => item !== 0)) {
+                values = [];
+                labels = [];
+            }
             trace.values = values;
             trace.labels = labels.length > 1 ? labels : [fullAggName];
           } else {
