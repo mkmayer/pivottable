@@ -51,7 +51,7 @@ callWithJQuery ($, Plotly) ->
                         values = []
                         labels = []
                     trace.values = values
-                    trace.labels = if labels.length > 1 then labels else [fullAggName]
+                    trace.labels = if labels.length > 0 then labels else [fullAggName]
                 else
                     trace.x = if transpose then values else labels
                     trace.y = if transpose then labels else values
