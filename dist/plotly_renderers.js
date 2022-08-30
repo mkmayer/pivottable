@@ -67,7 +67,7 @@
                 labels = [];
             }
             trace.values = values;
-            trace.labels = labels.length > 1 ? labels : [fullAggName];
+            trace.labels = labels.length > 0 ? labels : [fullAggName];
           } else {
             trace.x = transpose ? values : labels;
             trace.y = transpose ? labels : values;
