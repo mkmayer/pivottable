@@ -131,7 +131,11 @@
             automargin: true
           };
         }
-        result = $("<div>").appendTo($("body"));
+        if (opts.target) {
+          result = $("<div>").appendTo($(opts.target));
+        } else {
+          result = $("<div>").appendTo($("body"));
+        }
         Plotly.newPlot(result[0], data, $.extend(true, layout, layoutOptions, opts.plotly), opts.plotlyConfig);
         return result.detach();
       };
