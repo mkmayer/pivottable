@@ -12,7 +12,7 @@
   };
 
   callWithJQuery(function($, Plotly) {
-    var makePlotlyChart, makePlotlyScatterChart;
+    var makePlotlyChart, makePlotlyScatterChart, makePlotlyTimeLineChart;
     makePlotlyChart = function(traceOptions, layoutOptions, transpose) {
       if (traceOptions == null) {
         traceOptions = {};
@@ -203,8 +203,74 @@
         return result;
       };
     };
+      makePlotlyTimeLineChart = function() {
+          return function(pivotData, opts) {
+              var colKey, colKeys, data, defaults, j, k, layout, len, len1, renderArea, result, rowKey, rowKeys, v;
+              defaults = {
+                  localeStrings: {
+                      vs: "vs",
+                      by: "by"
+                  },
+                  plotly: {},
+                  plotlyConfig: {}
+              };
+              opts = $.extend(true, {}, defaults, opts);
+
+              layout = {
+                  title: pivotData.rowAttrs.join("-") + ' vs ' + pivotData.colAttrs.join("-"),
+                  xaxis: {
+                      title: pivotData.colAttrs.join('-'),
+                      automargin: true
+                  },
+                  yaxis: {
+                      title: pivotData.rowAttrs.join('-'),
+                      automargin: true
+                  },
+                  width: window.innerWidth / 1.5,
+                  height: window.innerHeight / 1.4 - 50
+              };
+              var extendedLayout = $.extend(true, layout, opts.plotly);
+
+              rowKeys = pivotData.getRowKeys();
+              if (rowKeys.length === 0) {
+                  rowKeys.push([]);
+              }
+              colKeys = pivotData.getColKeys();
+              if (colKeys.length === 0) {
+                  colKeys.push([]);
+              }
+              data = [];
+              for (j = 0, len = rowKeys.length; j < len; j++) {
+                  rowKey = rowKeys[j]; // start-datetime
+                  var startTime = rowKey[0];
+                  var endTime = rowKey[1];
+                  var value = rowKey[2];
+                  var text = rowKey[3];
+
+                  data.push({
+                      x: [startTime, endTime],
+                      y: [1, 1],
+                      type: 'scatter',
+                      //opacity: 0.5,
+                      line: { color: opts.dataConfig && opts.dataConfig.colors && opts.dataConfig.colors(value), width: extendedLayout.height - 50 },
+                      mode: 'lines',
+                      name: text
+                  });
+              }
+
+              renderArea = $("<div>", {
+                  style: "display:none;"
+              }).appendTo($("body"));
+              result = $("<div>").appendTo(renderArea);
+              Plotly.newPlot(result[0], data, extendedLayout, opts.plotlyConfig);
+              result.detach();
+              renderArea.remove();
+              return result;
+          };
+      };
     $.pivotUtilities.makePlotlyChart = makePlotlyChart;
     $.pivotUtilities.makePlotlyScatterChart = makePlotlyScatterChart;
+    $.pivotUtilities.makePlotlyTimeLineChart = makePlotlyTimeLineChart;
     return $.pivotUtilities.plotly_renderers = {
       "Horizontal Bar Chart": makePlotlyChart({
         type: 'bar',
@@ -233,6 +299,7 @@
         stackgroup: 1
       }),
       "Scatter Chart": makePlotlyScatterChart(),
+        "Timeline Chart": makePlotlyTimeLineChart(),
       'Multiple Pie Chart': makePlotlyChart({
         type: 'pie',
         scalegroup: 1,
