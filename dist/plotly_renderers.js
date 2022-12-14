@@ -203,6 +203,27 @@
         return result;
       };
     };
+
+    /*
+     Merge date intervals
+     [ ['2022-12-13T00:56:20.461Z','2022-12-13T00:56:21.186Z'], ['2022-12-13T00:56:21.160Z','2022-12-13T00:56:23.186Z'] ]
+     =>
+     [ ['2022-12-13T00:56:20.461Z','2022-12-13T00:56:23.186Z'] ]
+    */
+    var mergeIntervals = function(intervals) {
+        intervals.sort(function(a,b) {
+            return a[0].getTime() - b[0].getTime();
+        });
+        var result = [[intervals[0][0], intervals[0][1]]];
+        for (var i = 1; i < intervals.length; i++) {
+            if (intervals[i][0] <= result[result.length - 1][1]) {
+                result[result.length - 1][1] = Math.max(result[result.length - 1][1], intervals[i][1]);
+            } else {
+                result.push(intervals[i]);
+            }
+        }
+        return result;
+    };
       makePlotlyTimeLineChart = function() {
           return function(pivotData, opts) {
               var colKey, colKeys, data, defaults, j, k, layout, len, len1, renderArea, result, rowKey, rowKeys, v;
@@ -240,21 +261,71 @@
                   colKeys.push([]);
               }
               data = [];
+
+              /*
+             {x:['2022-12-13T00:56:20.461Z','2022-12-13T00:56:21.186Z','2022-12-13T00:56:21.186Z','2022-12-13T00:56:25.186Z','2022-12-13T00:56:25.186Z','2022-12-13T00:56:30.186Z'],
+              y:[1,1,0,0,1,1],
+              type:'scatter',
+              line:{width:0, simplify:false},
+
+              mode:'lines',
+              name:'Run'}
+               */
+
+              // Prepocessing - prepare intervals for specified value
+              var valueDataMap = {};
+              var valueTextMap = {};
               for (j = 0, len = rowKeys.length; j < len; j++) {
-                  rowKey = rowKeys[j]; // start-datetime
+                  rowKey = rowKeys[j];
                   var startTime = rowKey[0];
                   var endTime = rowKey[1];
                   var value = rowKey[2];
                   var text = rowKey[3];
 
+                  valueTextMap[value] = text;
+
+                  var valueData = [];
+                  if (valueDataMap.hasOwnProperty(value)) {
+                      valueData = valueDataMap[value];
+                  }
+                  valueData.push([startTime, endTime]);
+                  valueDataMap[value] = valueData;
+              }
+
+              // Prepocessing - merge value intervals
+              var valueKeys = Object.keys(valueDataMap);
+              for(var i = 0; i < valueKeys.length; i++) {
+                  valueDataMap[valueKeys[i]] = mergeIntervals(valueDataMap[valueKeys[i]]);
+              }
+
+              for(var i = 0; i < valueKeys.length; i++) {
+                  var valueDataX = [];
+                  var valueDataY = [];
+                  var intervalPeaks = valueDataMap[valueKeys[i]];
+
+                  // Preprocessing - add steps 1->0, 0->1
+                  for(var j = 0; j < intervalPeaks.length; j++) {
+                      if (j > 0) {
+                          valueDataX.push(intervalPeaks[j][0]); // step 0->1
+                          valueDataY.push(0);
+                      }
+                      valueDataX.push(intervalPeaks[j][0]); // peak start
+                      valueDataY.push(1); // valueKeys[i]
+                      valueDataX.push(intervalPeaks[j][1]); // peak end
+                      valueDataY.push(1); // valueKeys[i]
+                      valueDataX.push(intervalPeaks[j][1]); // step 1->0
+                      valueDataY.push(0);
+                  }
+
                   data.push({
-                      x: [startTime, endTime],
-                      y: [1, 1],
+                      x: valueDataX,
+                      y: valueDataY,
                       type: 'scatter',
-                      //opacity: 0.5,
-                      line: { color: opts.dataConfig && opts.dataConfig.colors && opts.dataConfig.colors(value), width: extendedLayout.height - 50 },
                       mode: 'lines',
-                      name: text
+                      line: {width: 0, simplify: false},
+                      fill: 'tozeroy',
+                      fillcolor: opts.dataConfig && opts.dataConfig.colors && opts.dataConfig.colors(valueKeys[i]),
+                      name: valueTextMap[valueKeys[i]]
                   });
               }
 
