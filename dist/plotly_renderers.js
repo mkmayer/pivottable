@@ -212,12 +212,17 @@
     */
     var mergeIntervals = function(intervals) {
         intervals.sort(function(a,b) {
+            if (!a || !a[0] || typeof a[0].getMonth !== 'function') {
+                return -1;
+            } else if (!b || !b[0] || typeof b[0].getMonth !== 'function') {
+                return 1;
+            }
             return a[0].getTime() - b[0].getTime();
         });
         var result = [[intervals[0][0], intervals[0][1]]];
         for (var i = 1; i < intervals.length; i++) {
-            if (intervals[i][0] <= result[result.length - 1][1]) {
-                result[result.length - 1][1] = Math.max(result[result.length - 1][1], intervals[i][1]);
+            if (intervals[i][0].getTime() <= result[result.length - 1][1].getTime()) {
+                result[result.length - 1][1] = new Date(Math.max(result[result.length - 1][1].getTime(), intervals[i][1].getTime()));
             } else {
                 result.push(intervals[i]);
             }
@@ -305,16 +310,18 @@
 
                   // Preprocessing - add steps 1->0, 0->1
                   for(var j = 0; j < intervalPeaks.length; j++) {
-                      if (j > 0) {
+                      if (intervalPeaks[j][0]) {
                           valueDataX.push(intervalPeaks[j][0]); // step 0->1
                           valueDataY.push(0);
+                          valueDataX.push(intervalPeaks[j][0]); // peak start
+                          valueDataY.push(1); // valueKeys[i]
                       }
-                      valueDataX.push(intervalPeaks[j][0]); // peak start
-                      valueDataY.push(1); // valueKeys[i]
-                      valueDataX.push(intervalPeaks[j][1]); // peak end
-                      valueDataY.push(1); // valueKeys[i]
-                      valueDataX.push(intervalPeaks[j][1]); // step 1->0
-                      valueDataY.push(0);
+                      if (intervalPeaks[j][1]) {
+                          valueDataX.push(intervalPeaks[j][1]); // peak end
+                          valueDataY.push(1); // valueKeys[i]
+                          valueDataX.push(intervalPeaks[j][1]); // step 1->0
+                          valueDataY.push(0);
+                      }
                   }
 
                   data.push({
