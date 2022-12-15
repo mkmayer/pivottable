@@ -329,7 +329,7 @@
                       y: valueDataY,
                       type: 'scatter',
                       mode: 'lines',
-                      line: {width: 0, simplify: false},
+                      line: {color: opts.dataConfig && opts.dataConfig.colors && opts.dataConfig.colors(valueKeys[i]), width: 0, simplify: false},
                       fill: 'tozeroy',
                       fillcolor: opts.dataConfig && opts.dataConfig.colors && opts.dataConfig.colors(valueKeys[i]),
                       name: valueTextMap[valueKeys[i]]
