@@ -1686,7 +1686,7 @@
         }
         this.html(opts.localeStrings.uiRenderError);
       }
-      return this;
+      return {_this: this, refresh, opts};
     };
 
     /*
